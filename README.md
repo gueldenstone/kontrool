@@ -6,7 +6,9 @@ project to use pulse and muscle sensors to control music and light
 
 ## pin layout
 
-| Signal   | Pin | Comment |
-| -------- | --- | ------- |
-| OLED SDA | A4  |         |
-| OLED SCL | A5  |         |
+| Signal        | Pin | Comment |
+| ------------- | --- | ------- |
+| OLED SDA      | A4  |         |
+| OLED SCL      | A5  |         |
+| Muscle Sensor | A0  |         |
+| CV Out        | D5  |         |
