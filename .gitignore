@@ -33,6 +33,8 @@
 
 # vscode
 *.code-workspace
+.vscode
+bin/
 
 # mac
 .DS_Store
