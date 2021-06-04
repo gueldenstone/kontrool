@@ -105,6 +105,11 @@ public:
 
 		oled.display();
 	}
+	void dim(const uint8_t &dim)
+	{
+		oled.ssd1306_command(SSD1306_SETCONTRAST);
+		oled.ssd1306_command(dim);
+	}
 };
 
 #endif /* _UI_HPP */
