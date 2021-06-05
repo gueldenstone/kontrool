@@ -105,10 +105,9 @@ public:
 
 		oled.display();
 	}
-	void dim(const uint8_t &dim)
+	void dim(const bool &dim)
 	{
-		oled.ssd1306_command(SSD1306_SETCONTRAST);
-		oled.ssd1306_command(dim);
+		oled.dim(dim);
 	}
 };
 
