@@ -11,6 +11,7 @@
 /* -------------------------------- includes -------------------------------- */
 #include "ui.hpp"
 #include "util.hpp"
+// #include <avr/iomxxhva.h>
 
 /* -------------------------- parameter definitons -------------------------- */
 const unsigned long baudRate = 115200;
@@ -31,6 +32,8 @@ void setup()
 	}
 	ui.displayLogo();
 	delay(2000);
+	pinMode(cvOut, OUTPUT);
+	TCCR0B = TCCR0B & B11111000 | B00000001; // for PWM
 }
 
 void loop()
