@@ -69,6 +69,7 @@ private:
 public:
 	bool start()
 	{
+		Wire.setClock(400000);
 		Wire.begin();
 		if (!oled.begin(SSD1306_SWITCHCAPVCC, oledAdrr))
 		{
@@ -95,11 +96,11 @@ public:
 
 		oled.setTextColor(WHITE);
 		oled.setTextSize(2);
-		// write target BPM
+		// write target BPM as value
 		oled.setCursor(5, 12);
 		oled.print(targetBPM);
 
-		// write current BPM
+		// write current BPM as value
 		oled.setCursor(5, 45);
 		oled.print(currentBPM);
 

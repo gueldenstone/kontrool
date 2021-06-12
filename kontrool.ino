@@ -11,7 +11,10 @@
 /* -------------------------------- includes -------------------------------- */
 #include "ui.hpp"
 #include "util.hpp"
-// #include <avr/iomxxhva.h>
+#include "pulseSensor.hpp"
+
+// debuggin?
+#define DEBUG false
 
 /* -------------------------- parameter definitons -------------------------- */
 const unsigned long baudRate = 115200;
@@ -20,9 +23,14 @@ const unsigned long baudRate = 115200;
 
 const uint8_t muscleSensor = A0;
 const uint8_t cvOut = 5;
+const uint8_t pulsePin = A1;
+const uint8_t motorPin = 3;
+
+PulseSensor *PulseSensor::OurThis;
 
 /* ---------------- global variables & object instantiations ---------------- */
 UI ui = UI();
+PulseSensor pulseSensor = PulseSensor(pulsePin);
 void setup()
 {
 	Serial.begin(baudRate);
@@ -31,27 +39,42 @@ void setup()
 		error("could not setup oled");
 	}
 	ui.displayLogo();
-	delay(2000);
+	// delay(2000);
 	pinMode(cvOut, OUTPUT);
-	TCCR0B = TCCR0B & B11111000 | B00000001; // for PWM
+	pinMode(motorPin, OUTPUT);
+	TCCR0B = TCCR0B & B11111000 | B00000001; // for PWM 62kHz
+	pulseSensor.setThreshold(480);
 }
 
+volatile uint16_t muscleSenseVal = 0;
+volatile uint8_t cvOutVal = 0;
+
+// loop
 void loop()
 {
-	static uint16_t muscleSenseVal = 0;
-	static uint8_t cvOutVal = 0;
-	static long pTime = 0;
-	static long now;
-	now = millis();
-
-	// do somthing every 20ms
-	if (now - pTime > 20)
+	ui.update(muscleSenseVal, 80, pulseSensor.getBPM());
+	if (pulseSensor.getPulse())
 	{
-		muscleSenseVal = analogRead(muscleSensor);
-		cvOutVal = map(muscleSenseVal, 0, 1023, 0, 255);
-
-		pTime = now;
+		digitalWrite(motorPin, HIGH);
+		analogWrite(cvOut, cvOutVal);
+#if DEBUG
+		Serial.print("BPM: ");
+		Serial.println(pulseSensor.getBPM());
+#endif
 	}
-	analogWrite(cvOut, cvOutVal);
-	ui.update(muscleSenseVal, 55, 60);
+	else
+	{
+		digitalWrite(motorPin, LOW);
+	}
+	delay(20);
+}
+
+// get data and process pulse samples
+ISR(TIMER2_COMPA_vect)
+{
+	DISABLE_PULSE_SENSOR_INTERRUPTS; // disable interrupts while we do this
+	muscleSenseVal = analogRead(muscleSensor);
+	cvOutVal = map(muscleSenseVal, 0, 1023, 0, 255);
+	PulseSensor::OurThis->onSampleTime();
+	ENABLE_PULSE_SENSOR_INTERRUPTS; // enable interrupts when you're done
 }
