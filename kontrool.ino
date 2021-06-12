@@ -11,14 +11,15 @@
 /* -------------------------------- includes -------------------------------- */
 #include "ui.hpp"
 #include "util.hpp"
+// #include <avr/iomxxhva.h>
 
 /* -------------------------- parameter definitons -------------------------- */
-const long baudRate = 115200;
+const unsigned long baudRate = 115200;
 
 /* ----------------------------- pin definitions ---------------------------- */
 
-const int muscleSensor = A0;
-const int cvOutMuscleSensor = 3;
+const uint8_t muscleSensor = A0;
+const uint8_t cvOut = 5;
 
 /* ---------------- global variables & object instantiations ---------------- */
 UI ui = UI();
@@ -31,22 +32,26 @@ void setup()
 	}
 	ui.displayLogo();
 	delay(2000);
+	pinMode(cvOut, OUTPUT);
+	TCCR0B = TCCR0B & B11111000 | B00000001; // for PWM
 }
 
 void loop()
 {
-	static int counter = 0;
-	static int pTime = 0;
-	static int now;
+	static uint16_t muscleSenseVal = 0;
+	static uint8_t cvOutVal = 0;
+	static long pTime = 0;
+	static long now;
 	now = millis();
 
-	// do somthing every 100ms
-	if (now - pTime > 500)
+	// do somthing every 20ms
+	if (now - pTime > 20)
 	{
-		counter += 20;
-		counter = counter & 0x3ff;
+		muscleSenseVal = analogRead(muscleSensor);
+		cvOutVal = map(muscleSenseVal, 0, 1023, 0, 255);
+
 		pTime = now;
 	}
-	ui.update(counter, 55, 60);
-	delay(100);
+	analogWrite(cvOut, cvOutVal);
+	ui.update(muscleSenseVal, 55, 60);
 }
