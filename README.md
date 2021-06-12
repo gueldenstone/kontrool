@@ -11,4 +11,6 @@ project to use pulse and muscle sensors to control music and light
 | OLED SDA      | A4  |         |
 | OLED SCL      | A5  |         |
 | Muscle Sensor | A0  |         |
+| Pulse Sensor  | A1  |         |
 | CV Out        | D5  |         |
+| LED/Vibration | D3  |         |
