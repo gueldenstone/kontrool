@@ -1,0 +1,8 @@
+* Try the fade function
+* try the vibration motor (4x pcs) with the extra power needed (figure out the transistor circuit for it)
+* Redesign display + specific display clearing functionality 
+* BPM average 
+* Current BPM vs Goal BPM with the vibration motor
+* Figure out a way to do the Arm sleeve/casting (3D model in STL for 3D printing)
+* Op-amp circuit for CV/Modular(Muscle sensor) + Gate for the Pulse sensor 
+* MIDI (???)
