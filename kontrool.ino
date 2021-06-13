@@ -39,10 +39,16 @@ void setup()
 		error("could not setup oled");
 	}
 	ui.displayLogo();
-	// delay(2000);
-	pinMode(cvOut, OUTPUT);
+	delay(2000);
+	ui.clearDisplay();
+	ui.drawTemplate();
+
 	pinMode(motorPin, OUTPUT);
-	TCCR0B = TCCR0B & B11111000 | B00000001; // for PWM 62kHz
+
+	// configure CV Pin with higher PWM freq
+	setHigherPWMFreq();
+
+	// threshhold to avoid noise
 	pulseSensor.setThreshold(480);
 }
 

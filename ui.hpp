@@ -43,6 +43,34 @@ public:
 	~UI() {}
 
 private:
+	void updateCurrentBPM(const int &currentBPM)
+	{
+		// write current BPM as value
+		oled.fillRect(0, 42, 70, 20, BLACK); // clear part of display
+		oled.setTextColor(WHITE);
+		oled.setTextSize(2);
+		oled.setCursor(5, 45);
+		oled.print(currentBPM);
+	}
+	void updateTargetBPM(const int &targetBPM)
+	{
+		// write target BPM as value
+		oled.fillRect(0, 10, 70, 20, BLACK); // clear part of display
+		oled.setTextColor(WHITE);
+		oled.setTextSize(2);
+		oled.setCursor(5, 12);
+		oled.print(targetBPM);
+	}
+	void updateBar(const int &muscleSensor)
+	{
+		// clear the bar
+		oled.fillRect(barX0 + 1, barY0 + 1, barWidth - 1, barHeight - 1, BLACK);
+		// fill the bar
+		int curHeight = map(muscleSensor, 0, 1023, 0, barHeight);
+		oled.fillRect(barX0, barY0 + (barHeight - curHeight), barWidth, curHeight, WHITE);
+	}
+
+public:
 	void drawTemplate()
 	{
 		oled.setTextColor(WHITE);
@@ -81,28 +109,29 @@ public:
 	{
 		oled.clearDisplay();
 		oled.setTextColor(WHITE);
+		oled.fillScreen(BLACK);
 		oled.setTextSize(2);
 		oled.setCursor(oledWidth / 2 - 50, oledHeight / 2 - 10);
 		oled.print("KONTROOL");
 		oled.display();
 	}
-	void update(int muscleSensor, int targetBPM, int currentBPM)
+	void clearDisplay()
 	{
 		oled.clearDisplay();
-		drawTemplate();
-		// fill the bar
-		int curHeight = map(muscleSensor, 0, 1023, 0, barHeight);
-		oled.fillRect(barX0, barY0 + (barHeight - curHeight), barWidth, curHeight, WHITE);
+	}
+	void update(const int &muscleSensor, const int &targetBPM, const int &currentBPM)
+	{
+		static int lastTargetBPM;
 
-		oled.setTextColor(WHITE);
-		oled.setTextSize(2);
-		// write target BPM as value
-		oled.setCursor(5, 12);
-		oled.print(targetBPM);
+		updateBar(muscleSensor);
+		updateCurrentBPM(currentBPM);
 
-		// write current BPM as value
-		oled.setCursor(5, 45);
-		oled.print(currentBPM);
+		// check if target BPM has changed
+		if (targetBPM != lastTargetBPM)
+		{
+			updateTargetBPM(targetBPM);
+			lastTargetBPM = targetBPM;
+		}
 
 		oled.display();
 	}
