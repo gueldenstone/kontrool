@@ -1,3 +1,4 @@
+
 /**
  * @file: kontrool.ino
  *
@@ -22,7 +23,7 @@ const unsigned long baudRate = 115200;
 /* ----------------------------- pin definitions ---------------------------- */
 
 const uint8_t muscleSensor = A0;
-const uint8_t cvOut = 5;
+const uint8_t cvOut = 10;
 const uint8_t pulsePin = A1;
 const uint8_t motorPin = 3;
 
@@ -31,6 +32,8 @@ PulseSensor *PulseSensor::OurThis;
 /* ---------------- global variables & object instantiations ---------------- */
 UI ui = UI();
 PulseSensor pulseSensor = PulseSensor(pulsePin);
+const int numReadings = 31;
+int readings[numReadings];
 void setup()
 {
 	Serial.begin(baudRate);
@@ -50,37 +53,90 @@ void setup()
 
 	// threshhold to avoid noise
 	pulseSensor.setThreshold(480);
+
+	// zero readings array
+	for (int i = 0; i < numReadings; i++)
+	{
+		readings[i] = 0;
+	}
 }
 
 volatile uint16_t muscleSenseVal = 0;
 volatile uint8_t cvOutVal = 0;
 
 // loop
+unsigned long pTime = 0;
+unsigned long interval;
+uint8_t average = 0;
+int sum;
+long pTime2 = 0;
+uint8_t count = 0;
+int smooth;
+int total = 0;
+int readIndex = 0;
+bool motorOn = false;
 void loop()
 {
-	ui.update(muscleSenseVal, 80, pulseSensor.getBPM());
-	if (pulseSensor.getPulse())
+	unsigned long now = millis();
+
+	// smoothing
+	total -= readings[readIndex];
+	int bpm = pulseSensor.getBPM();
+	if (bpm < smooth + 5 || bpm > smooth - 5)
 	{
-		digitalWrite(motorPin, HIGH);
-		analogWrite(cvOut, cvOutVal);
-#if DEBUG
-		Serial.print("BPM: ");
-		Serial.println(pulseSensor.getBPM());
-#endif
+		readings[readIndex] = bpm;
 	}
-	else
+	total += readings[readIndex];
+	readIndex += 1;
+
+	if (readIndex >= numReadings)
 	{
-		digitalWrite(motorPin, LOW);
+		readIndex = 0;
 	}
-	delay(20);
+
+	// calculate smooth
+	smooth = total / numReadings;
+
+	if (now - pTime2 >= 500)
+	{
+		pTime2 = now;
+		sum += smooth;
+		count++;
+		if (count >= 20)
+		{
+			average = sum / 20;
+			sum = 0;
+			count = 0;
+		}
+	}
+
+	// interval for the vibration motor output
+	interval = 30000 / smooth;
+
+	//
+	if ((now - pTime) >= interval)
+	{
+		pTime = now;
+		motorOn ^= true;
+		if (motorOn)
+		{
+			digitalWrite(motorPin, HIGH);
+		}
+		else
+		{
+			digitalWrite(motorPin, LOW);
+		}
+	}
+	ui.update(muscleSenseVal, 80, average);
+	analogWrite(cvOut, cvOutVal);
 }
 
 // get data and process pulse samples
 ISR(TIMER2_COMPA_vect)
 {
 	DISABLE_PULSE_SENSOR_INTERRUPTS; // disable interrupts while we do this
+	PulseSensor::OurThis->onSampleTime();
 	muscleSenseVal = analogRead(muscleSensor);
 	cvOutVal = map(muscleSenseVal, 0, 1023, 0, 255);
-	PulseSensor::OurThis->onSampleTime();
 	ENABLE_PULSE_SENSOR_INTERRUPTS; // enable interrupts when you're done
 }

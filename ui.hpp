@@ -14,6 +14,7 @@
 #include <Wire.h>							// the I2C library
 #include <Adafruit_GFX.h>			// the graphics library
 #include <Adafruit_SSD1306.h> // the SSD1306 library
+#include <OLED_SSD1306_Chart.h>
 
 /**
  * use these pins:
@@ -42,7 +43,7 @@ public:
 	}
 	~UI() {}
 
-private:
+public:
 	void updateCurrentBPM(const int &currentBPM)
 	{
 		// write current BPM as value

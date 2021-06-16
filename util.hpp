@@ -44,7 +44,7 @@ void error()
 
 void setHigherPWMFreq()
 {
-	TCCR0B = TCCR0B & B11111000 | B00000001; // for PWM 62kHz
+	TCCR1B = TCCR1B & B11111000 | B00000001; // for PWM 31.4kHz
 }
 
 #endif /* _UTIL_HPP */

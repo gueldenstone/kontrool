@@ -23,7 +23,7 @@ public:
 		OurThis = this;
 		InputPin = inputPin;
 		// Initialize (seed) the pulse detector
-		sampleIntervalMs = 1;
+		sampleIntervalMs = 2;
 		resetVariables();
 		initInterrupts();
 	}
@@ -215,12 +215,12 @@ public:
 private:
 	void initInterrupts()
 	{
-		// Initializes Timer2 to throw an interrupt every 2mS.
-		// Interferes with PWM on pins 9 and 10
-		TCCR2A = 0x00;	// Disable PWM and go into CTC mode
-		TCCR2B = 0x0C;	// prescaler 256
-		OCR2A = 0x007C; // count to 124 for 2mS interrupt
-		TIMSK2 = 0x02;	// Enable OCR1A match interrupt	DISABLE BY SETTING TO 0x00
+		// Initializes Timer2 to throw an interrupt every 2mS
+		// Interferes with PWM on pins 3 and 11
+		TCCR2A = 0x02; // Disable PWM and go into CTC mode
+		TCCR2B = 0x05; // don't force compare, 128 prescaler
+		OCR2A = 0XF9;	 // set count to 249 for 2mS interrupt
+		TIMSK2 = 0x02; // Enable OCR2A match interrupt DISABLE BY SETTING TO 0x00
 		ENABLE_PULSE_SENSOR_INTERRUPTS;
 	}
 };
