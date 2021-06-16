@@ -127,7 +127,9 @@ void loop()
 			digitalWrite(motorPin, LOW);
 		}
 	}
-	ui.update(muscleSenseVal, 80, average);
+	int val = analogRead(A1);
+	val = map(val, 0, 1023, 0, 25);
+	ui.update(muscleSenseVal, val, average);
 	analogWrite(cvOut, cvOutVal);
 }
 

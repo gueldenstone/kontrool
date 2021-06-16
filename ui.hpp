@@ -14,7 +14,6 @@
 #include <Wire.h>							// the I2C library
 #include <Adafruit_GFX.h>			// the graphics library
 #include <Adafruit_SSD1306.h> // the SSD1306 library
-#include <OLED_SSD1306_Chart.h>
 
 /**
  * use these pins:
@@ -43,7 +42,7 @@ public:
 	}
 	~UI() {}
 
-public:
+private:
 	void updateCurrentBPM(const int &currentBPM)
 	{
 		// write current BPM as value
@@ -52,15 +51,6 @@ public:
 		oled.setTextSize(2);
 		oled.setCursor(5, 45);
 		oled.print(currentBPM);
-	}
-	void updateTargetBPM(const int &targetBPM)
-	{
-		// write target BPM as value
-		oled.fillRect(0, 10, 70, 20, BLACK); // clear part of display
-		oled.setTextColor(WHITE);
-		oled.setTextSize(2);
-		oled.setCursor(5, 12);
-		oled.print(targetBPM);
 	}
 	void updateBar(const int &muscleSensor)
 	{
@@ -77,10 +67,6 @@ public:
 		oled.setTextColor(WHITE);
 		oled.setTextSize(1);
 
-		// target value
-		oled.setCursor(0, 0);
-		oled.print("target BPM");
-
 		// current value
 		oled.setCursor(0, 33);
 		oled.print("current BPM");
@@ -93,6 +79,10 @@ public:
 		oled.drawLine(barX0 + barWidth, barY0, barX0 + barWidth, barY0 + barHeight, WHITE);	 // right
 		oled.drawLine(barX0, barY0, barX0 + barWidth, barY0, WHITE);												 // top
 		oled.drawLine(barX0, barY0 + barHeight, barX0 + barWidth, barY0 + barHeight, WHITE); //bottom
+
+		// chart
+		// oled.drawLine(1, 1, 1, 30, WHITE);	 // y-axis
+		// oled.drawLine(1, 31, 70, 31, WHITE); // x-axis
 	}
 
 public:
@@ -120,19 +110,25 @@ public:
 	{
 		oled.clearDisplay();
 	}
-	void update(const int &muscleSensor, const int &targetBPM, const int &currentBPM)
+	void update(const int &muscleSensor, const int &pulse, const int &currentBPM)
 	{
 		static int lastTargetBPM;
+		static int lastX, lastY;
+		static int x = 2;
+		int y = 25 - pulse + 2;
+		if (x > 66)
+		{
+			x = 2;
+			lastX = x;
+			oled.fillRect(0, 0, 70, 31, BLACK); //
+		}
+		oled.writeLine(lastX, lastY, x, y, WHITE);
+		lastX = x;
+		lastY = y;
 
+		x++;
 		updateBar(muscleSensor);
 		updateCurrentBPM(currentBPM);
-
-		// check if target BPM has changed
-		if (targetBPM != lastTargetBPM)
-		{
-			updateTargetBPM(targetBPM);
-			lastTargetBPM = targetBPM;
-		}
 
 		oled.display();
 	}
