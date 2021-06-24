@@ -4,6 +4,8 @@
  * @date: 2021-06-12
  *
  * @author: Yazan Saleh & Lukas Güldenstein 
+ * 
+ * @note partly copied from library at https://github.com/WorldFamousElectronics/PulseSensorPlayground
  */
 
 #ifndef _PULSESENSOR_HPP

@@ -34,6 +34,8 @@ UI ui = UI();
 PulseSensor pulseSensor = PulseSensor(pulsePin);
 const int numReadings = 31;
 int readings[numReadings];
+
+/* ---------------------------------- setup --------------------------------- */
 void setup()
 {
 	Serial.begin(baudRate);
@@ -61,20 +63,23 @@ void setup()
 	}
 }
 
+/* ------------------------- variables in interrupt ------------------------- */
 volatile uint16_t muscleSenseVal = 0;
 volatile uint8_t cvOutVal = 0;
 
-// loop
+/* ------------------------ global variables in loop ------------------------ */
 unsigned long pTime = 0;
+unsigned long pTime2 = 0;
 unsigned long interval;
 uint8_t average = 0;
 int sum;
-long pTime2 = 0;
 uint8_t count = 0;
 int smooth;
 int total = 0;
 int readIndex = 0;
 bool motorOn = false;
+
+/* ---------------------------------- loop ---------------------------------- */
 void loop()
 {
 	unsigned long now = millis();
@@ -97,6 +102,7 @@ void loop()
 	// calculate smooth
 	smooth = total / numReadings;
 
+	/* -------------------------------- averaging ------------------------------- */
 	if (now - pTime2 >= 500)
 	{
 		pTime2 = now;
@@ -127,12 +133,16 @@ void loop()
 			digitalWrite(motorPin, LOW);
 		}
 	}
+
+	// read pulse sensor value and map for display
 	int val = analogRead(A1);
 	val = map(val, 0, 1023, 0, 25);
+	// update ui
 	ui.update(muscleSenseVal, val, average);
 	analogWrite(cvOut, cvOutVal);
 }
 
+/* ------------------------ interrupt service routine ----------------------- */
 // get data and process pulse samples
 ISR(TIMER2_COMPA_vect)
 {

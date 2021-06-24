@@ -3,7 +3,7 @@
  *
  * @date: 2021-06-02
  *
- * @author: Lukas Güldenstein 
+ * @author: Yazan Saleh & Lukas Güldenstein 
  */
 
 #ifndef _UTIL_HPP
